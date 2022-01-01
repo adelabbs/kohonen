@@ -27,9 +27,12 @@ utilise GL et glut
 #define NB_NEURON 20
 #define MAX_Y 200
 #define MAX_X 200
-#define NB_NEURON_Y 5
-#define NB_NEURON_X 4
 
+//Configure the topological distribution of neurons
+#define NB_NEURON_Y 1 
+#define NB_NEURON_X 20
+
+//The offset is used to center the elements displayed by the GUI
 #define OFFSET_X 20
 #define OFFSET_Y 20
 
@@ -144,21 +147,26 @@ void load_cities()
   fclose(file);
 }
 
-
 void arrangeNeurons() {
   int i, j;
   double x, y;
   for (int k = 0; k < NB_NEURON; k++) {
     i = (k % NB_NEURON_X);
     j = (k / NB_NEURON_X);
-    x = (MAX_X / NB_NEURON_X) * i;
-    y = (MAX_Y / NB_NEURON_Y) * j;
+    //Random initial weights:
+    x = (double)(rand() % MAX_X);
+    y = (double)(rand() % MAX_Y);
+    /* // Uniform grid distribution
+      x = (MAX_X / NB_NEURON_X) * i;
+      y = (MAX_Y / NB_NEURON_Y) * j;
+    */
     neuronset[k] = CreateNeuron(i, j, x, y);
   }
 }
 
 /**
- * @brief Initializes a collection of links between the neurons of the network in a grid pattern
+ * @brief Computes and stores all the links between neurons of the network. This implementation creates links in a grid pattern.
+ * Here all the neurons are on the same line (i.e. 1D topology, j=0), but this implementation allows the creation of 2D topology.
  *
  */
 void createNeuronLinks() {
