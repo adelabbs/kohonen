@@ -24,7 +24,7 @@ void PrintData(Data data);
 void DestroyData(Data *data);
 void DestroyDataset(Dataset dataset, size_t datasetSize);
 void PrintDataset(Dataset dataset, size_t datasetSize);
-
+void resetDrawnData(int datasetSize);
 
 Neuron CreateNeuron(int i, int j, double x, double y);
 void ComputePotential(Neuron *neuronSet, size_t nbNeurons, Data data);
