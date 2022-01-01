@@ -50,6 +50,8 @@ int height = DEFAULT_HEIGHT;
 Dataset dataset;
 Data currentData;
 Neuron neuronset[NB_NEURON];
+int nbLinks = (NB_NEURON_X - 1) * NB_NEURON_Y + (NB_NEURON_Y - 1) * NB_NEURON_X;
+int links[(NB_NEURON_X - 1) * NB_NEURON_Y + (NB_NEURON_Y - 1) * NB_NEURON_X][2];
 
 /* affiche la chaine fmt a partir des coordonn�es x,y*/
 void draw_text(float x, float y, const char *fmt, ...)
@@ -155,9 +157,35 @@ void arrangeNeurons() {
   }
 }
 
+/**
+ * @brief Initializes a collection of links between the neurons of the network in a grid pattern
+ *
+ */
+void createNeuronLinks() {
+  int l = 0;
+  int neuron = 0;
+  while (l < nbLinks) {
+    //For each neuron add a link with the neuron on the right and the neuron below if they exist
+    //Link with the neuron on the right
+    if (((neuron + 1) % NB_NEURON_X != 0) && (neuron + 1) < NB_NEURON) {
+      links[l][0] = neuron;
+      links[l][1] = neuron + 1;
+      l++;
+    }
+    //Link with the neuron  below
+    if (neuron + NB_NEURON_X < NB_NEURON) {
+      links[l][0] = neuron;
+      links[l][1] = neuron + NB_NEURON_X;
+      l++;
+    }
+    neuron++;
+  }
+}
+
 void createKohonen() {
   InitialiseSet(&dataset, DATASET_SIZE, DATA_SIZE);
   arrangeNeurons();
+  createNeuronLinks();
   PrintNeuronCoordinates(neuronset, NB_NEURON);
 }
 
@@ -205,7 +233,7 @@ int main(int argc, char **argv)
   data = transform_img_to_vector(argv[1], &width, &height);
   load_cities();
 #endif
-
+  srand(time(0));
   createKohonen();
   currentData = SortData(dataset, DATASET_SIZE);
 
@@ -282,40 +310,40 @@ void affichage()
 
   draw_text(60, 70, "nb iter: %d", cpt);
 #else
-  // VOTRE CODE D'AFFICHAGE ICI, voir l'exemple ci-dessous
-  // ceci est un exemple pour tracer des points et des lignes
-
-  /*
-  glBegin(GL_POINTS);
-  glColor3f(1.0, 0.0, 0.0);
-  glVertex2f(50, 25);
-  glEnd();
-
-  glBegin(GL_POINTS);
-  glColor3f(1.0, 0.0, 0.0);
-  glVertex2f(75, 10);
-  glEnd();
-
-  glBegin(GL_LINE_LOOP);
-  glColor3f(1.0, 0.0, 0.0);
-  glVertex2f(50, 25);
-  glVertex2f(75, 10);
-  glEnd();
-
-  */
-
-
-  for (int k = 0; k < NB_NEURON; k++) {
+  //Draw neurons
+  int k;
+  for (k = 0; k < NB_NEURON; k++) {
     glBegin(GL_POINTS);
     glColor3f(1.0, 0.0, 0.0);
     glVertex2d(neuronset[k].x + OFFSET_X, neuronset[k].y + OFFSET_Y);
     glEnd();
   }
 
-  glBegin(GL_POINTS);
-  glColor3f(0.0, 1.0, 0.0);
-  glVertex2i(currentData.set[0] + OFFSET_X, currentData.set[1] + OFFSET_Y);
-  glEnd();
+  //Draw neuron links
+  for (k = 0; k < nbLinks; k++) {
+    glBegin(GL_LINE_LOOP);
+    glColor3f(1.0, 0.0, 0.0);
+    glVertex2d(neuronset[links[k][0]].x + OFFSET_X, neuronset[links[k][0]].y + OFFSET_Y);
+    glVertex2d(neuronset[links[k][1]].x + OFFSET_X, neuronset[links[k][1]].y + OFFSET_Y);
+    glEnd();
+  }
+
+  //Draw data points
+  Data data;
+  for (k = 0; k < DATASET_SIZE; k++) {
+    data = dataset[k];
+    glBegin(GL_POINTS);
+    if (currentData.set[0] == data.set[0] && currentData.set[1] == data.set[1]) {
+      //The current data point used by the network is in a different color
+      glColor3f(0.0, 0.0, 1.0);
+    }
+    else {
+      glColor3f(0.0, 1.0, 0.0);
+
+    }
+    glVertex2i(data.set[0] + OFFSET_X, data.set[1] + OFFSET_Y);
+    glEnd();
+  }
 
   glColor3f(1.0, 1.0, 1.0);
   draw_text(170 + OFFSET_X, 20 + OFFSET_Y, "nb iter: %d", cpt);
@@ -326,10 +354,11 @@ void affichage()
   glutSwapBuffers();
 }
 
-// VOTRE CODE DE KOHONEN ICI
 void idle() {
-  if (calc) { // calc est modifi� si on presse "p" (voir la fonction "clavier" ci dessous)
+  if (calc) { // calc est modifiee si on presse "p" (voir la fonction "clavier" ci dessous)
     cpt++; // un simple compteur
+
+    currentData = SortData(dataset, DATASET_SIZE);
     ComputePotential(neuronset, NB_NEURON, currentData);
     ComputeActivity(neuronset, NB_NEURON);
     int winnerId = GetWinningNeuron(neuronset, NB_NEURON);
@@ -337,6 +366,7 @@ void idle() {
     Neuron winner = neuronset[winnerId];
     UpdateWeights(neuronset, NB_NEURON, currentData, winner);
     PrintNeuronCoordinates(neuronset, NB_NEURON);
+
     glutPostRedisplay();
   }
 }

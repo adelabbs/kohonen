@@ -10,9 +10,9 @@
 #define DVN 2
 #define ALPHA 0.7
 #define BETA 0.1
-#define EPSILON 0.001
+#define EPSILON 0.01
 
-int *drawnData;
+int *drawnData = NULL;
 int drawnCount = 0;
 
 Data RandomData(size_t n) {
@@ -49,11 +49,18 @@ void DestroyDataset(Dataset dataset, size_t datasetSize) {
 }
 
 void resetDrawnData(int datasetSize) {
-    drawnData = (int *)malloc(datasetSize * sizeof(int));
     drawnCount = 0;
     if (drawnData == NULL) {
-        perror("Couldn't allocate memory");
-        exit(EXIT_FAILURE);
+        drawnData = (int *)malloc(datasetSize * sizeof(int));
+        if (drawnData == NULL) {
+            perror("Couldn't allocate memory");
+            exit(EXIT_FAILURE);
+        }
+    }
+    else {
+        for (int i = 0; i < datasetSize; i++) {
+            drawnData[i] = 0;
+        }
     }
 }
 
@@ -66,19 +73,21 @@ void InitialiseSet(Dataset *dataset, int datasetSize, int dataSize) {
 }
 
 Data SortData(Dataset dataset, size_t datasetSize) {
+    if (drawnCount >= datasetSize) { resetDrawnData(datasetSize); }
     int draw = 0;
-    if (drawnCount >= datasetSize) { exit(EXIT_FAILURE);}
+    int i;
     while (!draw) {
-        draw = rand() % datasetSize;
-        if (drawnData[draw] == 0) {
-            drawnData[draw] = 1;
+        i = rand() % datasetSize;
+        if (drawnData[i] == 0) {
+            drawnData[i] = 1;
+            draw = 1;
             drawnCount++;
         }
         else {
             draw = 0;
         }
     }
-    return dataset[draw];
+    return dataset[i];
 }
 
 /**
@@ -108,12 +117,12 @@ void PrintDataset(Dataset dataset, size_t datasetSize) {
 
 /**
  * @brief Create a Neuron object. The neuron potential and activation values are both set to 0
- * 
- * @param i 
- * @param j 
- * @param x 
- * @param y 
- * @return Neuron 
+ *
+ * @param i
+ * @param j
+ * @param x
+ * @param y
+ * @return Neuron
  */
 Neuron CreateNeuron(int i, int j, double x, double y) {
     Neuron neuron = {
