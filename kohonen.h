@@ -12,8 +12,7 @@ typedef Data *Dataset; /* Array of Data vectors */
 typedef struct {
     int i;
     int j;
-    double x; /* Neuron weight */
-    double y; /* Neuron weight */
+    double *weights; /* Neuron weights */
     double pot; /* Neuron potential*/
     double act; /* Neuron activation value */
 }Neuron;
@@ -26,10 +25,11 @@ void DestroyDataset(Dataset dataset, size_t datasetSize);
 void PrintDataset(Dataset dataset, size_t datasetSize);
 void resetDrawnData(int datasetSize);
 
-Neuron CreateNeuron(int i, int j, double x, double y);
-void ComputePotential(Neuron *neuronSet, size_t nbNeurons, Data data);
+Neuron CreateNeuron(int i, int j, double *weights);
+void ComputePotential(Neuron *neuronSet, size_t nbNeurons, size_t nbWeights, Data data);
 void ComputeActivity(Neuron *neuronSet, size_t nbNeurons);
 int GetWinningNeuron(Neuron *neuronSet, size_t nbNeurons);
-void UpdateWeights(Neuron *neuronSet, size_t nbNeurons, Data data, Neuron winner);
-void PrintNeuronCoordinates(Neuron *neuronSet, size_t nbNeurons);
+void UpdateWeights(Neuron *neuronSet, size_t nbNeurons, size_t nbWeights, Data data,
+    Neuron winner, int epsilon, int alpha, int beta);
+void PrintNeuronCoordinates(Neuron *neuronSet, size_t nbNeurons, size_t nbWeights);
 #endif /* __KOHONEN_H__*/

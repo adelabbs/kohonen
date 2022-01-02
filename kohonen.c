@@ -8,9 +8,6 @@
 #define DATA_MIN 0
 #define DVP 1
 #define DVN 2
-#define ALPHA 0.9
-#define BETA 0.1
-#define EPSILON 0.1
 
 int *drawnData = NULL;
 int drawnCount = 0;
@@ -129,24 +126,27 @@ void PrintDataset(Dataset dataset, size_t datasetSize) {
  * @param y
  * @return Neuron
  */
-Neuron CreateNeuron(int i, int j, double x, double y) {
+Neuron CreateNeuron(int i, int j, double *weights) {
     Neuron neuron = {
         .i = i,
         .j = j,
-        .x = x,
-        .y = y,
+        .weights = weights,
         .pot = 0,
         .act = 0
     };
     return neuron;
 }
 
-void PrintNeuronCoordinates(Neuron *neuronSet, size_t nbNeurons) {
+void PrintNeuronCoordinates(Neuron *neuronSet, size_t nbNeurons, size_t nbWeights) {
     printf("-------------------\n");
     printf("Neuron coordinates:\n");
     printf("-------------------\n");
     for (int k = 0; k < nbNeurons; k++) {
-        printf("%d, i = %d, j = %d : [%f, %f]\n", k, neuronSet[k].i, neuronSet[k].j, neuronSet[k].x, neuronSet[k].y);
+        printf("%d, i = %d, j = %d : [ ", k, neuronSet[k].i, neuronSet[k].j);
+        for (int l = 0; l < nbWeights; l++) {
+            printf("%f, ", neuronSet[k].weights[l]);
+        }
+        printf("]\n");
     }
     printf("-------------------\n");
 }
@@ -160,9 +160,12 @@ void PrintNeuronCoordinates(Neuron *neuronSet, size_t nbNeurons) {
  * @param data Must be a 2-D data, as the implementation is computing a eucledian distance
  * @return double
  */
-double potential(Neuron neuron, Data data) {
-    int *set = data.set;
-    return sqrt((neuron.x - set[0]) * (neuron.x - set[0]) + (neuron.y - set[1]) * (neuron.y - set[1]));
+double potential(Neuron neuron, size_t nbWeights, Data data) {
+    double s = 0;
+    for (int i = 0; i < nbWeights; i++) {
+        s += (neuron.weights[i] - data.set[i]) * (neuron.weights[i] - data.set[i]);
+    }
+    return sqrt(s);
 }
 
 /**
@@ -172,9 +175,9 @@ double potential(Neuron neuron, Data data) {
  * @param nbNeurons
  * @param data
  */
-void ComputePotential(Neuron *neuronSet, size_t nbNeurons, Data data) {
+void ComputePotential(Neuron *neuronSet, size_t nbNeurons, size_t nbWeights, Data data) {
     for (int i = 0; i < nbNeurons; i++) {
-        neuronSet[i].pot = potential(neuronSet[i], data);
+        neuronSet[i].pot = potential(neuronSet[i], nbWeights, data);
     }
 }
 
@@ -215,7 +218,7 @@ int GetWinningNeuron(Neuron *neuronSet, size_t nbNeurons) {
  * @param neuron
  * @return int returns an inhibitory or excitatory coefficient.
  */
-double phi(Neuron winner, Neuron neuron) {
+double phi(Neuron winner, Neuron neuron, int alpha, int beta) {
     int wi = winner.i;
     int wj = winner.j;
     int i = neuron.i;
@@ -228,10 +231,10 @@ double phi(Neuron winner, Neuron neuron) {
         coef = 1;
     }
     else if (di <= DVP && dj <= DVP) {
-        coef = ALPHA;
+        coef = alpha;
     }
     else if (di <= DVN && dj <= DVN) {
-        coef = -BETA;
+        coef = -beta;
     }
     return coef;
 }
@@ -244,9 +247,10 @@ double phi(Neuron winner, Neuron neuron) {
  * @param data
  * @param winner The winning neuron corresponding to the passde data for the current iteration
  */
-void UpdateWeights(Neuron *neuronSet, size_t nbNeurons, Data data, Neuron winner) {
+void UpdateWeights(Neuron *neuronSet, size_t nbNeurons, size_t nbWeights, Data data, Neuron winner, int epsilon, int alpha, int beta) {
     for (int i = 0; i < nbNeurons; i++) {
-        neuronSet[i].x = neuronSet[i].x + EPSILON * (data.set[0] - neuronSet[i].x) * phi(winner, neuronSet[i]);
-        neuronSet[i].y = neuronSet[i].y + EPSILON * (data.set[1] - neuronSet[i].y) * phi(winner, neuronSet[i]);
+        for (int j = 0; j < nbWeights; j++) {
+            neuronSet[i].weights[j] = neuronSet[i].weights[j] + epsilon * (data.set[j] - neuronSet[i].weights[j]) * phi(winner, neuronSet[i], alpha, beta);
+        }
     }
 }

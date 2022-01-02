@@ -21,9 +21,15 @@ utilise GL et glut
 #define DEFAULT_WIDTH  600
 #define DEFAULT_HEIGHT 600
 #define NB_VILLE 21
-#define MODE 1
-#define DATA_SIZE 2
+#define MODE 0
 
+
+#define DATA_SIZE 2
+#define NB_WEIGHTS DATA_SIZE
+
+#define ALPHA 0.9
+#define BETA 0.1
+#define EPSILON 0.01
 
 #if MODE
 #define NB_NEURON NB_VILLE
@@ -33,6 +39,7 @@ utilise GL et glut
 #define MAX_Y 600
 #define MAX_X 600
 #else
+
 #define DATASET_SIZE 20
 #define NB_NEURON 20
 //Configure the topological distribution of neurons
@@ -167,17 +174,29 @@ void arrangeNeurons() {
   for (int k = 0; k < NB_NEURON; k++) {
     i = (k % NB_NEURON_X);
     j = (k / NB_NEURON_X);
-    
+
     //Random initial weights:
-    //x = (double)(rand() % MAX_X);
-    //y = (double)(rand() % MAX_Y);
-    
+    x = (double)(rand() % MAX_X);
+    y = (double)(rand() % MAX_Y);
+
     // Uniform grid distribution
-    
-    x = 100 + (MAX_X / NB_NEURON_X) * i;
-    y = 300 + (MAX_Y / NB_NEURON_Y) * j;
-    
-    neuronset[k] = CreateNeuron(i, j, x, y);
+
+    /*
+    x = (MAX_X / NB_NEURON_X) * i;
+    y = (MAX_Y / NB_NEURON_Y) * j;
+    */
+
+    double *weights = (double *)malloc(NB_WEIGHTS * sizeof(double));
+    if (weights == NULL) { perror("Couldn't allocate memory in function arrangeNeurons"); exit(EXIT_FAILURE); }
+    weights[0] = x;
+    weights[1] = y;
+    neuronset[k] = CreateNeuron(i, j, weights);
+  }
+}
+
+void destroyNeurons(){
+  for(int i = 0; i < NB_NEURON; i++){
+    free(neuronset[i].weights);
   }
 }
 
@@ -227,11 +246,12 @@ void createKohonen() {
   InitialiseSet(&dataset, DATASET_SIZE, DATA_SIZE);
   arrangeNeurons();
   createNeuronLinks();
-  PrintNeuronCoordinates(neuronset, NB_NEURON);
+  PrintNeuronCoordinates(neuronset, NB_NEURON, DATA_SIZE);
 }
 
 void destroyKohonen() {
   DestroyDataset(dataset, DATASET_SIZE);
+  destroyNeurons();
 }
 
 /* Initialize OpenGL Graphics */
@@ -385,7 +405,7 @@ void affichage()
   for (k = 0; k < NB_NEURON; k++) {
     glBegin(GL_POINTS);
     glColor3f(1.0, 0.0, 0.0);
-    glVertex2d(neuronset[k].x + OFFSET_X, neuronset[k].y + OFFSET_Y);
+    glVertex2d(neuronset[k].weights[0] + OFFSET_X, neuronset[k].weights[1] + OFFSET_Y);
     glEnd();
   }
 
@@ -393,8 +413,8 @@ void affichage()
   for (k = 0; k < nbLinks; k++) {
     glBegin(GL_LINE_LOOP);
     glColor3f(1.0, 0.0, 0.0);
-    glVertex2d(neuronset[links[k][0]].x + OFFSET_X, neuronset[links[k][0]].y + OFFSET_Y);
-    glVertex2d(neuronset[links[k][1]].x + OFFSET_X, neuronset[links[k][1]].y + OFFSET_Y);
+    glVertex2d(neuronset[links[k][0]].weights[0] + OFFSET_X, neuronset[links[k][0]].weights[1] + OFFSET_Y);
+    glVertex2d(neuronset[links[k][1]].weights[0] + OFFSET_X, neuronset[links[k][1]].weights[1] + OFFSET_Y);
     glEnd();
   }
 
@@ -428,13 +448,13 @@ void idle() {
   if (calc) {
     cpt++;
     currentData = SortData(dataset, DATASET_SIZE);
-    ComputePotential(neuronset, NB_NEURON, currentData);
+    ComputePotential(neuronset, NB_NEURON, NB_WEIGHTS, currentData);
     ComputeActivity(neuronset, NB_NEURON);
     int winnerId = GetWinningNeuron(neuronset, NB_NEURON);
     printf("winner id = %d \n", winnerId);
     Neuron winner = neuronset[winnerId];
-    UpdateWeights(neuronset, NB_NEURON, currentData, winner);
-    PrintNeuronCoordinates(neuronset, NB_NEURON);
+    UpdateWeights(neuronset, NB_NEURON, NB_WEIGHTS, currentData, winner, EPSILON, ALPHA, BETA);
+    PrintNeuronCoordinates(neuronset, NB_NEURON, NB_WEIGHTS);
 
     glutPostRedisplay();
   }
