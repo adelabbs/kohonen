@@ -176,16 +176,15 @@ void arrangeNeurons() {
     i = (k % NB_NEURON_X);
     j = (k / NB_NEURON_X);
 
+#if MODE 
+    // Uniform grid distribution
+    x = 75 + (MAX_X / NB_NEURON_X) * i;
+    y = 350 + (MAX_Y / NB_NEURON_Y) * j;
+#else
     //Random initial weights:
     x = (double)(rand() % MAX_X);
     y = (double)(rand() % MAX_Y);
-
-    // Uniform grid distribution
-
-    /*
-    x = (MAX_X / NB_NEURON_X) * i;
-    y = (MAX_Y / NB_NEURON_Y) * j;
-    */
+#endif
 
     double *weights = (double *)malloc(NB_WEIGHTS * sizeof(double));
     if (weights == NULL) { perror("Couldn't allocate memory in function arrangeNeurons"); exit(EXIT_FAILURE); }
