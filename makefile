@@ -1,7 +1,13 @@
-all : base_opengl
+all : base_opengl compression
 
 base_opengl: base_opengl.o ppm.o kohonen.o
 	gcc -g -Wall ppm.o base_opengl.o kohonen.o -o base_opengl -lGL -lGLU -lglut -lm 
+
+compression: compression.o ppm.o kohonen.o
+	gcc -g -Wall ppm.o kohonen.o compression.o -o compression -lGL -lGLU -lglut -lm 
+
+compression.o: compression.c
+	gcc -g -Wall -c compression.c -o compression.o
 
 ppm.o : ppm.c ppm.h
 	gcc -g -Wall -c ppm.c -o ppm.o

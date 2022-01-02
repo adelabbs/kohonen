@@ -27,10 +27,6 @@ utilise GL et glut
 #define DATA_SIZE 2
 #define NB_WEIGHTS DATA_SIZE
 
-#define ALPHA 0.9
-#define BETA 0.1
-#define EPSILON 0.01
-
 #if MODE
 #define NB_NEURON NB_VILLE
 #define NB_NEURON_Y 1 
@@ -453,7 +449,7 @@ void idle() {
     int winnerId = GetWinningNeuron(neuronset, NB_NEURON);
     printf("winner id = %d \n", winnerId);
     Neuron winner = neuronset[winnerId];
-    UpdateWeights(neuronset, NB_NEURON, NB_WEIGHTS, currentData, winner, EPSILON, ALPHA, BETA);
+    UpdateWeights(neuronset, NB_NEURON, NB_WEIGHTS, currentData, winner);
     PrintNeuronCoordinates(neuronset, NB_NEURON, NB_WEIGHTS);
 
     glutPostRedisplay();
