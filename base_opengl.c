@@ -195,8 +195,8 @@ void arrangeNeurons() {
   }
 }
 
-void destroyNeurons(){
-  for(int i = 0; i < NB_NEURON; i++){
+void destroyNeurons() {
+  for (int i = 0; i < NB_NEURON; i++) {
     free(neuronset[i].weights);
   }
 }
@@ -229,6 +229,7 @@ void createNeuronLinks() {
 
 Dataset createCitiesDataset(Point *cities, size_t nbCities) {
   Dataset dataset = (Dataset)malloc(nbCities * sizeof(Data));
+  if (dataset == NULL) { perror("Couldn't allocate memory in createCitiesDataset"); exit(EXIT_FAILURE); }
   for (int i = 0; i < nbCities; i++) {
     int *set = (int *)malloc(2 * sizeof(int));
     if (set == NULL) { perror("Couldn't allocate memory in createCitiesDataset"); exit(EXIT_FAILURE); }
@@ -252,6 +253,9 @@ void createKohonen() {
 
 void destroyKohonen() {
   DestroyDataset(dataset, DATASET_SIZE);
+#if MODE
+  free(dataset);
+#endif
   destroyNeurons();
 }
 
