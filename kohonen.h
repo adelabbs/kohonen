@@ -29,6 +29,7 @@ Neuron CreateNeuron(int i, int j, double *weights);
 void ComputePotential(Neuron *neuronSet, size_t nbNeurons, size_t nbWeights, Data data);
 void ComputeActivity(Neuron *neuronSet, size_t nbNeurons);
 int GetWinningNeuron(Neuron *neuronSet, size_t nbNeurons);
-void UpdateWeights(Neuron *neuronSet, size_t nbNeurons, size_t nbWeights, Data data, Neuron winner);
+void UpdateWeights(Neuron *neuronSet, size_t nbNeurons, size_t nbWeights, Data data, Neuron winner,
+    double epsilon, double alpha, double beta);
 void PrintNeuronCoordinates(Neuron *neuronSet, size_t nbNeurons, size_t nbWeights);
 #endif /* __KOHONEN_H__*/

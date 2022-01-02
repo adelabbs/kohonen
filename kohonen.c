@@ -8,9 +8,6 @@
 #define DATA_MIN 0
 #define DVP 1
 #define DVN 2
-#define ALPHA 0.9
-#define BETA 0.1
-#define EPSILON 0.01
 
 int *drawnData = NULL;
 int drawnCount = 0;
@@ -219,7 +216,7 @@ int GetWinningNeuron(Neuron *neuronSet, size_t nbNeurons) {
  * @param neuron
  * @return int returns an inhibitory or excitatory coefficient.
  */
-double phi(Neuron winner, Neuron neuron) {
+double phi(Neuron winner, Neuron neuron, double alpha, double beta) {
     int wi = winner.i;
     int wj = winner.j;
     int i = neuron.i;
@@ -232,10 +229,10 @@ double phi(Neuron winner, Neuron neuron) {
         coef = 1;
     }
     else if (di <= DVP && dj <= DVP) {
-        coef = ALPHA;
+        coef = alpha;
     }
     else if (di <= DVN && dj <= DVN) {
-        coef = -BETA;
+        coef = -beta;
     }
     return coef;
 }
@@ -248,10 +245,10 @@ double phi(Neuron winner, Neuron neuron) {
  * @param data
  * @param winner The winning neuron corresponding to the passde data for the current iteration
  */
-void UpdateWeights(Neuron *neuronSet, size_t nbNeurons, size_t nbWeights, Data data, Neuron winner) {
+void UpdateWeights(Neuron *neuronSet, size_t nbNeurons, size_t nbWeights, Data data, Neuron winner, double epsilon, double alpha, double beta) {
     for (int i = 0; i < nbNeurons; i++) {
         for (int j = 0; j < nbWeights; j++) {
-            neuronSet[i].weights[j] = neuronSet[i].weights[j] + EPSILON * (data.set[j] - neuronSet[i].weights[j]) * phi(winner, neuronSet[i]);
+            neuronSet[i].weights[j] = neuronSet[i].weights[j] + epsilon * (data.set[j] - neuronSet[i].weights[j]) * phi(winner, neuronSet[i], alpha, beta);
         }
     }
 }

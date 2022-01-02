@@ -28,4 +28,4 @@ ppm.h :
 	touch ppm.h
 
 clean :
-	rm -f base_opengl *.o
+	rm -f base_opengl compression *.o

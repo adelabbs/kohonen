@@ -27,6 +27,9 @@ utilise GL et glut
 #define DATA_SIZE 2
 #define NB_WEIGHTS DATA_SIZE
 
+#define ALPHA 0.9
+#define BETA 0.1
+
 #if MODE
 #define NB_NEURON NB_VILLE
 #define NB_NEURON_Y 1 
@@ -34,8 +37,8 @@ utilise GL et glut
 #define DATASET_SIZE NB_VILLE
 #define MAX_Y 600
 #define MAX_X 600
+#define EPSILON 0.1
 #else
-
 #define DATASET_SIZE 20
 #define NB_NEURON 20
 //Configure the topological distribution of neurons
@@ -43,6 +46,8 @@ utilise GL et glut
 #define NB_NEURON_X 20
 #define MAX_Y 200
 #define MAX_X 200
+#define EPSILON 0.01
+
 #endif
 
 //The offset is used to center the elements displayed by the GUI
@@ -449,7 +454,7 @@ void idle() {
     int winnerId = GetWinningNeuron(neuronset, NB_NEURON);
     printf("winner id = %d \n", winnerId);
     Neuron winner = neuronset[winnerId];
-    UpdateWeights(neuronset, NB_NEURON, NB_WEIGHTS, currentData, winner);
+    UpdateWeights(neuronset, NB_NEURON, NB_WEIGHTS, currentData, winner, EPSILON, ALPHA, BETA);
     PrintNeuronCoordinates(neuronset, NB_NEURON, NB_WEIGHTS);
 
     glutPostRedisplay();
