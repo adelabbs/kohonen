@@ -15,9 +15,6 @@
 #define DATA_SIZE 3
 #define NB_WEIGHTS DATA_SIZE
 
-#define L1 480 
-#define L2 640
-
 #define INPUT_PATH "perroquet.ppm"
 #define OUPUT_PATH "compressed256.ppm"
 

@@ -231,8 +231,8 @@ int GetWinningNeuron(Neuron *neuronSet, size_t nbNeurons) {
  * 
  * @param winner The winning neuron
  * @param neuron The neuron to consider
- * @param alpha the excitatory constant parameter
- * @param beta the inhibitory constant parameter
+ * @param alpha the excitatory constant parameter, should be a positive value
+ * @param beta the inhibitory constant parameter, should be a positive value
  * @return double returns an inhibitory or excitatory coefficient.
  */
 double phi(Neuron winner, Neuron neuron, double alpha, double beta) {
