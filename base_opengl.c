@@ -21,7 +21,7 @@ utilise GL et glut
 #define DEFAULT_WIDTH  600
 #define DEFAULT_HEIGHT 600
 #define NB_VILLE 21
-#define MODE 0
+#define MODE 1
 
 
 #define DATA_SIZE 2
@@ -303,7 +303,7 @@ int main(int argc, char **argv)
   resetDrawnData(NB_VILLE);
   arrangeNeurons();
   createNeuronLinks();
-  PrintNeuronCoordinates(neuronset, NB_NEURON);
+  PrintNeuronCoordinates(neuronset, NB_NEURON, NB_WEIGHTS);
   currentData = SortData(dataset, DATASET_SIZE);
 #else
   createKohonen();
@@ -392,7 +392,7 @@ void affichage()
   for (k = 0; k < NB_NEURON; k++) {
     glBegin(GL_POINTS);
     glColor3f(0.0, 1.0, 0.0);
-    glVertex2d(neuronset[k].x, neuronset[k].y);
+    glVertex2d(neuronset[k].weights[0], neuronset[k].weights[1]);
     glEnd();
   }
 
@@ -400,8 +400,8 @@ void affichage()
   for (k = 0; k < nbLinks; k++) {
     glBegin(GL_LINE_LOOP);
     glColor3f(0.0, 1.0, 0.0);
-    glVertex2d(neuronset[links[k][0]].x, neuronset[links[k][0]].y);
-    glVertex2d(neuronset[links[k][1]].x, neuronset[links[k][1]].y);
+    glVertex2d(neuronset[links[k][0]].weights[0], neuronset[links[k][0]].weights[1]);
+    glVertex2d(neuronset[links[k][1]].weights[0], neuronset[links[k][1]].weights[1]);
     glEnd();
   }
 #else
