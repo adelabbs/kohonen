@@ -4,18 +4,18 @@
 
 typedef struct {
     int *set;
-    size_t size;
+    size_t size; /* Size of the set */
 }Data;
 
-typedef Data *Dataset;
+typedef Data *Dataset; /* Array of Data vectors */
 
 typedef struct {
     int i;
     int j;
-    double x;
-    double y;
-    double pot;
-    double act;
+    double x; /* Neuron weight */
+    double y; /* Neuron weight */
+    double pot; /* Neuron potential*/
+    double act; /* Neuron activation value */
 }Neuron;
 
 void InitialiseSet(Dataset *dataset, int datasetSize, int dataSize);

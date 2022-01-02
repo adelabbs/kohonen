@@ -6,9 +6,6 @@ typedef struct {
   char name[50];
 } Point;
 
-
-
-
 void draw_text(float x, float y, const char *fmt, ...);
 
 
@@ -19,4 +16,3 @@ void reshape(int x,int y);
 void mouse(int bouton,int etat,int x,int y);
 void mousemotion(int x,int y);
 void idle();
-

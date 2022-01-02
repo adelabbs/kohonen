@@ -21,16 +21,26 @@ utilise GL et glut
 #define DEFAULT_WIDTH  600
 #define DEFAULT_HEIGHT 600
 #define NB_VILLE 21
-#define MODE 0
-#define DATASET_SIZE 20
+#define MODE 1
 #define DATA_SIZE 2
-#define NB_NEURON 20
-#define MAX_Y 200
-#define MAX_X 200
 
+
+#if MODE
+#define NB_NEURON NB_VILLE
+#define NB_NEURON_Y 1 
+#define NB_NEURON_X NB_NEURON
+#define DATASET_SIZE NB_VILLE
+#define MAX_Y 600
+#define MAX_X 600
+#else
+#define DATASET_SIZE 20
+#define NB_NEURON 20
 //Configure the topological distribution of neurons
 #define NB_NEURON_Y 1 
 #define NB_NEURON_X 20
+#define MAX_Y 200
+#define MAX_X 200
+#endif
 
 //The offset is used to center the elements displayed by the GUI
 #define OFFSET_X 20
@@ -38,7 +48,6 @@ utilise GL et glut
 
 int cpt = 0;
 int calc = 0;
-//int exec_idle_block_once = 1;
 char presse;
 Point ville[NB_VILLE];
 int anglex = 0;
@@ -52,6 +61,7 @@ int height = DEFAULT_HEIGHT;
 //Kohonen simulation
 Dataset dataset;
 Data currentData;
+
 Neuron neuronset[NB_NEURON];
 int nbLinks = (NB_NEURON_X - 1) * NB_NEURON_Y + (NB_NEURON_Y - 1) * NB_NEURON_X;
 int links[(NB_NEURON_X - 1) * NB_NEURON_Y + (NB_NEURON_Y - 1) * NB_NEURON_X][2];
@@ -147,6 +157,10 @@ void load_cities()
   fclose(file);
 }
 
+/**
+ * @brief Fills the neuronset, and arranges neuron topology
+ *
+ */
 void arrangeNeurons() {
   int i, j;
   double x, y;
@@ -156,9 +170,11 @@ void arrangeNeurons() {
     //Random initial weights:
     x = (double)(rand() % MAX_X);
     y = (double)(rand() % MAX_Y);
-    /* // Uniform grid distribution
-      x = (MAX_X / NB_NEURON_X) * i;
-      y = (MAX_Y / NB_NEURON_Y) * j;
+
+    // Uniform grid distribution
+    /*
+    x = (MAX_X / NB_NEURON_X) * i;
+    y = (MAX_Y / NB_NEURON_Y) * j;
     */
     neuronset[k] = CreateNeuron(i, j, x, y);
   }
@@ -188,6 +204,22 @@ void createNeuronLinks() {
     }
     neuron++;
   }
+}
+
+Dataset createCitiesDataset(Point *cities, size_t nbCities) {
+  Dataset dataset = (Dataset)malloc(nbCities * sizeof(Data));
+  for (int i = 0; i < nbCities; i++) {
+    int *set = (int *)malloc(2 * sizeof(int));
+    if (set == NULL) { perror("Couldn't allocate memory in createCitiesDataset"); exit(EXIT_FAILURE); }
+    set[0] = cities[i].x;
+    set[1] = cities[i].y;
+    Data data = {
+      .set = set,
+      .size = 2
+    };
+    dataset[i] = data;
+  }
+  return dataset;
 }
 
 void createKohonen() {
@@ -234,17 +266,23 @@ void initGL(int w, int h)
 /* main */
 int main(int argc, char **argv)
 {
-
+  srand(time(0));
 #if MODE
   unsigned char *data = NULL;
   if (argc != 2) EXIT_ON_ERROR("You must specified a .ppm file");
   data = transform_img_to_vector(argv[1], &width, &height);
   load_cities();
-#endif
-  srand(time(0));
+  dataset = createCitiesDataset(ville, NB_VILLE);
+  PrintDataset(dataset, DATASET_SIZE);
+  resetDrawnData(NB_VILLE);
+  arrangeNeurons();
+  createNeuronLinks();
+  PrintNeuronCoordinates(neuronset, NB_NEURON);
+  currentData = SortData(dataset, DATASET_SIZE);
+#else
   createKohonen();
   currentData = SortData(dataset, DATASET_SIZE);
-
+#endif
   /* GLUT init */
   glutInit(&argc, argv);            // Initialize GLUT
   glutInitDisplayMode(GLUT_DOUBLE); // Enable double buffered mode
@@ -278,7 +316,7 @@ int main(int argc, char **argv)
   /* Delete used resources and quit */
   glDeleteTextures(1, &textureID);
 #endif
-
+  DestroyDataset(dataset, DATASET_SIZE);
   return 0;
 }
 
@@ -306,7 +344,12 @@ void affichage()
   for (i = 0; i < NB_VILLE; i++)
   {
     glBegin(GL_POINTS);
-    glColor3f(1.0, 0.0, 0.0);
+    if (currentData.set[0] == ville[i].x && currentData.set[1] == ville[i].y) {
+      glColor3f(0.0, 0.0, 1.0);
+    }
+    else {
+      glColor3f(1.0, 0.0, 0.0);
+    }
     glVertex2f(ville[i].x, ville[i].y);
     glEnd();
     glColor3f(0, 0, 0);
@@ -317,6 +360,24 @@ void affichage()
   // glColor3f(1.0, 1.0, 1.0);
 
   draw_text(60, 70, "nb iter: %d", cpt);
+
+  //Draw neurons
+  int k;
+  for (k = 0; k < NB_NEURON; k++) {
+    glBegin(GL_POINTS);
+    glColor3f(0.0, 1.0, 0.0);
+    glVertex2d(neuronset[k].x, neuronset[k].y);
+    glEnd();
+  }
+
+  //Draw neuron links
+  for (k = 0; k < nbLinks; k++) {
+    glBegin(GL_LINE_LOOP);
+    glColor3f(0.0, 1.0, 0.0);
+    glVertex2d(neuronset[links[k][0]].x, neuronset[links[k][0]].y);
+    glVertex2d(neuronset[links[k][1]].x, neuronset[links[k][1]].y);
+    glEnd();
+  }
 #else
   //Draw neurons
   int k;
@@ -363,9 +424,8 @@ void affichage()
 }
 
 void idle() {
-  if (calc) { // calc est modifiee si on presse "p" (voir la fonction "clavier" ci dessous)
-    cpt++; // un simple compteur
-
+  if (calc) {
+    cpt++;
     currentData = SortData(dataset, DATASET_SIZE);
     ComputePotential(neuronset, NB_NEURON, currentData);
     ComputeActivity(neuronset, NB_NEURON);

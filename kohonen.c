@@ -8,9 +8,9 @@
 #define DATA_MIN 0
 #define DVP 1
 #define DVN 2
-#define ALPHA 0.9
-#define BETA 0.1
-#define EPSILON 0.02
+#define ALPHA 0.8
+#define BETA 0.2
+#define EPSILON 0.1
 
 int *drawnData = NULL;
 int drawnCount = 0;
@@ -57,10 +57,8 @@ void resetDrawnData(int datasetSize) {
             exit(EXIT_FAILURE);
         }
     }
-    else {
-        for (int i = 0; i < datasetSize; i++) {
-            drawnData[i] = 0;
-        }
+    for (int i = 0; i < datasetSize; i++) {
+        drawnData[i] = 0;
     }
 }
 
@@ -72,6 +70,13 @@ void InitialiseSet(Dataset *dataset, int datasetSize, int dataSize) {
     }
 }
 
+/**
+ * @brief Draws a random Data from the dataset
+ *
+ * @param dataset
+ * @param datasetSize
+ * @return Data
+ */
 Data SortData(Dataset dataset, size_t datasetSize) {
     if (drawnCount >= datasetSize) { resetDrawnData(datasetSize); }
     int draw = 0;
@@ -231,6 +236,14 @@ double phi(Neuron winner, Neuron neuron) {
     return coef;
 }
 
+/**
+ * @brief Updates all neuron weights for a given iteration. Prerequisite: Determine the winning neuron before calling this function
+ *
+ * @param neuronSet
+ * @param nbNeurons
+ * @param data
+ * @param winner The winning neuron corresponding to the passde data for the current iteration
+ */
 void UpdateWeights(Neuron *neuronSet, size_t nbNeurons, Data data, Neuron winner) {
     for (int i = 0; i < nbNeurons; i++) {
         neuronSet[i].x = neuronSet[i].x + EPSILON * (data.set[0] - neuronSet[i].x) * phi(winner, neuronSet[i]);
