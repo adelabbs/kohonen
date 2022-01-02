@@ -9,9 +9,15 @@
 #define DVP 1
 #define DVN 2
 
-int *drawnData = NULL;
-int drawnCount = 0;
+int *drawnData = NULL; /* Global array to keep track of drawn data */
+int drawnCount = 0; /* Number of distinct Data drawn so far */
 
+/**
+ * @brief Creates a random Data vector
+ * 
+ * @param n the size of the data vector
+ * @return Data a random Data vector of size n
+ */
 Data RandomData(size_t n) {
     int *set = (int *)malloc(n * sizeof(int));
     if (set == NULL) {
@@ -45,6 +51,11 @@ void DestroyDataset(Dataset dataset, size_t datasetSize) {
     }
 }
 
+/**
+ * @brief Initializes or Resets the globlal array that keeps track drawn data
+ * 
+ * @param datasetSize the size of the dataset
+ */
 void resetDrawnData(int datasetSize) {
     drawnCount = 0;
     if (drawnData == NULL) {
@@ -59,6 +70,13 @@ void resetDrawnData(int datasetSize) {
     }
 }
 
+/**
+ * @brief Allocates memory for the dataset and fills it with random Data vectors
+ * 
+ * @param dataset 
+ * @param datasetSize 
+ * @param dataSize 
+ */
 void InitialiseSet(Dataset *dataset, int datasetSize, int dataSize) {
     *dataset = (Dataset)malloc(datasetSize * sizeof(Data));
     resetDrawnData(datasetSize);
@@ -119,12 +137,11 @@ void PrintDataset(Dataset dataset, size_t datasetSize) {
 
 /**
  * @brief Create a Neuron object. The neuron potential and activation values are both set to 0
- *
- * @param i
- * @param j
- * @param x
- * @param y
- * @return Neuron
+ * 
+ * @param i 
+ * @param j 
+ * @param weights 
+ * @return Neuron 
  */
 Neuron CreateNeuron(int i, int j, double *weights) {
     Neuron neuron = {
@@ -211,10 +228,12 @@ int GetWinningNeuron(Neuron *neuronSet, size_t nbNeurons) {
 /**
  * @brief Computes the topological distance between a pair of neuron and returns an inhibitory or excitatory coefficient.
  *          This implementation considers i, j components of the neuron to compute their topological distance.
- *
+ * 
  * @param winner The winning neuron
- * @param neuron
- * @return int returns an inhibitory or excitatory coefficient.
+ * @param neuron The neuron to consider
+ * @param alpha the excitatory constant parameter
+ * @param beta the inhibitory constant parameter
+ * @return double returns an inhibitory or excitatory coefficient.
  */
 double phi(Neuron winner, Neuron neuron, double alpha, double beta) {
     int wi = winner.i;
@@ -239,11 +258,15 @@ double phi(Neuron winner, Neuron neuron, double alpha, double beta) {
 
 /**
  * @brief Updates all neuron weights for a given iteration. Prerequisite: Determine the winning neuron before calling this function
- *
- * @param neuronSet
- * @param nbNeurons
- * @param data
+ * 
+ * @param neuronSet 
+ * @param nbNeurons The number of neurons
+ * @param nbWeights The number of weight components for a given neuron, i.e. the neuron weights dimension
+ * @param data 
  * @param winner The winning neuron corresponding to the passde data for the current iteration
+ * @param epsilon The learning rate
+ * @param alpha The excitatory coefficient
+ * @param beta The inhibitory  coefficient
  */
 void UpdateWeights(Neuron *neuronSet, size_t nbNeurons, size_t nbWeights, Data data, Neuron winner, double epsilon, double alpha, double beta) {
     for (int i = 0; i < nbNeurons; i++) {
