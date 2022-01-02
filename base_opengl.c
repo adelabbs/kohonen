@@ -167,15 +167,16 @@ void arrangeNeurons() {
   for (int k = 0; k < NB_NEURON; k++) {
     i = (k % NB_NEURON_X);
     j = (k / NB_NEURON_X);
+    
     //Random initial weights:
-    x = (double)(rand() % MAX_X);
-    y = (double)(rand() % MAX_Y);
-
+    //x = (double)(rand() % MAX_X);
+    //y = (double)(rand() % MAX_Y);
+    
     // Uniform grid distribution
-    /*
-    x = (MAX_X / NB_NEURON_X) * i;
-    y = (MAX_Y / NB_NEURON_Y) * j;
-    */
+    
+    x = 100 + (MAX_X / NB_NEURON_X) * i;
+    y = 300 + (MAX_Y / NB_NEURON_Y) * j;
+    
     neuronset[k] = CreateNeuron(i, j, x, y);
   }
 }

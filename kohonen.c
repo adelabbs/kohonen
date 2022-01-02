@@ -8,8 +8,8 @@
 #define DATA_MIN 0
 #define DVP 1
 #define DVN 2
-#define ALPHA 0.8
-#define BETA 0.2
+#define ALPHA 0.9
+#define BETA 0.1
 #define EPSILON 0.1
 
 int *drawnData = NULL;
