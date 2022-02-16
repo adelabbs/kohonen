@@ -26,7 +26,7 @@ Run with
 
 Run with 
 ```bash
-./compression carte_france_vierge.ppm
+./compression
 ```
 
 The program will generate a 256-color compressed image of 'perroquet.ppm'
